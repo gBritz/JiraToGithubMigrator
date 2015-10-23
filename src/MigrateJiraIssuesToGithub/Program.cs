@@ -15,7 +15,7 @@ namespace MigrateJiraIssuesToGithub
             var jiraClientApi = new JiraClientApi("username", "password");
 
             Console.WriteLine("Searching issues from project ***");
-            var searchResult = jiraClientApi.Search("project = *** ORDER BY created DESC", 0, 50, "customfield_10006", "labels"); //"issueType"
+            var searchResult = jiraClientApi.Search("project = *** ORDER BY created DESC", 0, 50, "customfield_10006", "issuetype", "labels");
             Console.WriteLine("Searched issues " + searchResult.Total.ToString());
 
             var projectUtil = new ProjectHelper();
