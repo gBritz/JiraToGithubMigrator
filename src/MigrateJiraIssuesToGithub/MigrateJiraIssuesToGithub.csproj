@@ -45,13 +45,32 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Checker.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Models\Author.cs" />
+    <Compile Include="Models\Comment.cs" />
+    <Compile Include="Models\Issue.cs" />
+    <Compile Include="Models\ProjectDetail.cs" />
+    <Compile Include="Models\Sprint.cs" />
+    <Compile Include="ObjectExtension.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="ProjectHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JiraClientApi\JiraApi.csproj">
+      <Project>{08343292-7a34-4146-abda-c09df2f67b15}</Project>
+      <Name>JiraApi</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
