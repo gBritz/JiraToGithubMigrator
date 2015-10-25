@@ -48,6 +48,7 @@
     <Compile Include="Checker.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MarkdownFlavorConverter.cs" />
     <Compile Include="Models\Author.cs" />
     <Compile Include="Models\Comment.cs" />
     <Compile Include="Models\Issue.cs" />

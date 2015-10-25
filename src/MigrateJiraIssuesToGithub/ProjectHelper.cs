@@ -2,12 +2,20 @@
 using MigrateJiraIssuesToGithub.Models;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace MigrateJiraIssuesToGithub
 {
     public class ProjectHelper
     {
+        private readonly MarkdownFlavorConverter markdownConverter;
+
+        public ProjectHelper(MarkdownFlavorConverter markdownConverter)
+        {
+            Checker.IsNull(markdownConverter, "markdownConverter");
+
+            this.markdownConverter = markdownConverter;
+        }
+
         public ProjectDetail ConvertToProjectDetail(SearchInfo searchResult)
         {
             Checker.IsNull(searchResult, "searchResult");
@@ -77,9 +85,11 @@ namespace MigrateJiraIssuesToGithub
             {
                 foreach (var comment in issueFields.Comment.Comments)
                 {
+                    var content = markdownConverter.ReplaceFromJiraToGithub(comment.Body);
+
                     result.Add(new Comment
                     {
-                        Body = comment.Body,
+                        Body = content,
                         Creator = new Author
                         {
                             Name = comment.Author.DisplayName,
@@ -108,11 +118,6 @@ namespace MigrateJiraIssuesToGithub
             }
 
             return result;
-        }
-
-        public string ReplaceJiraMentionsToGithub(string text)
-        {
-            return Regex.Replace(text, @"(\[\~)(\w+)(\])", "@$2");
         }
 
         private void AddSprintIfNoContains(FieldInfo issueFields, List<string> sprints)
