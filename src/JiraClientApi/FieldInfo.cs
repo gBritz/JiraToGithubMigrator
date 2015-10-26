@@ -38,7 +38,7 @@ namespace JiraApi
 
         public DateTime? ResolutionDate { get; set; }
 
-        public int WorkRatio { get; set; }
+        public long WorkRatio { get; set; }
 
         public DateTime? LastViewed { get; set; }
 
