@@ -102,18 +102,24 @@ namespace MigrateJiraIssuesToGithub
             return result;
         }
 
-        public List<byte[]> ConvertToDataFile(FieldInfo issueFields, JiraClientApi jiraClientApi)
+        public List<AttachmentFile> ConvertToDataFile(FieldInfo issueFields, JiraClientApi jiraClientApi)
         {
             Checker.IsNull(issueFields, "issueFields");
             Checker.IsNull(jiraClientApi, "jiraClientApi");
 
-            var result = new List<byte[]>();
+            var result = new List<AttachmentFile>();
 
             if (issueFields.Attachment != null && issueFields.Attachment.Length > 0)
             {
                 foreach (var attachment in issueFields.Attachment)
                 {
-                    result.Add(jiraClientApi.Download(attachment.Content));
+                    var file = new AttachmentFile
+                    {
+                        FileName = attachment.Filename,
+                        MimeType = attachment.MimeType,
+                        Content = jiraClientApi.Download(attachment.Content)
+                    };
+                    result.Add(file);
                 }
             }
 

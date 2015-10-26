@@ -31,7 +31,7 @@ namespace MigrateJiraIssuesToGithub
 
                 var issue = projectUtil.ConvertToIssue(issueJira);
                 issue.Comments = projectUtil.ConvertToComments(issueJira.Fields);
-                issue.FileContents = projectUtil.ConvertToDataFile(issueJira.Fields, jiraClientApi);
+                issue.Files = projectUtil.ConvertToDataFile(issueJira.Fields, jiraClientApi);
 
                 issues.Add(issue);
             }
