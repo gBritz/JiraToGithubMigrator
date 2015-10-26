@@ -16,20 +16,8 @@ namespace MigrateJiraIssuesToGithub
             var jiraClientApi = new JiraClientApi("username", "password");
             var markdownConverter = new MarkdownFlavorConverter();
             var projectUtil = new ProjectHelper(markdownConverter);
-            var currentPage = 0;
-            var countIssues = 50;
 
-            Log("INFO: searching project description in jira issues");
-            ProjectDetail projectDetail = RetrieveProjectDescription("***", currentPage, countIssues, jiraClientApi, projectUtil);
-
-            while (currentPage < projectDetail.TotalIssues)
-            {
-                currentPage += countIssues;
-                Log(String.Format("INFO: retrieve currentPage={0}, countIssues={1}, total={2}", currentPage, countIssues, projectDetail.TotalIssues));
-                var projectResult = RetrieveProjectDescription("***", currentPage, countIssues, jiraClientApi, projectUtil);
-                projectDetail = MergeProjects(projectDetail, projectResult);
-            }
-
+            var projectDetail = RetrieveProjectDescription("***", jiraClientApi, projectUtil);
             File.WriteAllText(@"C:\Users\Guilherme\Desktop\jira-to-github\project.json", projectDetail.ToJson());
 
             Log("INFO: success!");
@@ -37,7 +25,26 @@ namespace MigrateJiraIssuesToGithub
             Console.ReadKey();
         }
 
-        public static ProjectDetail RetrieveProjectDescription(string projectName, int startAt, int countIssues, JiraClientApi clientApi, ProjectHelper projectUtil)
+        public static ProjectDetail RetrieveProjectDescription(String projectName, JiraClientApi clientApi, ProjectHelper projectUtil)
+        {
+            var currentPage = 0;
+            var countIssues = 50;
+
+            Log("INFO: searching project description in jira issues");
+            ProjectDetail projectDetail = RetrieveProjectDescriptionPagined(projectName, currentPage, countIssues, clientApi, projectUtil);
+
+            while (currentPage < projectDetail.TotalIssues)
+            {
+                currentPage += countIssues;
+                Log(String.Format("INFO: retrieve currentPage={0}, countIssues={1}, total={2}", currentPage, countIssues, projectDetail.TotalIssues));
+                var projectResult = RetrieveProjectDescriptionPagined(projectName, currentPage, countIssues, clientApi, projectUtil);
+                projectDetail = MergeProjects(projectDetail, projectResult);
+            }
+
+            return projectDetail;
+        }
+
+        public static ProjectDetail RetrieveProjectDescriptionPagined(string projectName, int startAt, int countIssues, JiraClientApi clientApi, ProjectHelper projectUtil)
         {
             var jql = String.Format("project = {0} ORDER BY created ASC", projectName);
             Log("Searching issues from project " + projectName);
