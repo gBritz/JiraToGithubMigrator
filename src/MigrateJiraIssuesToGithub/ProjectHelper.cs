@@ -73,7 +73,7 @@ namespace MigrateJiraIssuesToGithub
 
             if (issueFields.Assignee != null)
             {
-                issue.Assigneed = new Author
+                issue.Assigned = new Author
                 {
                     Name = issueFields.Assignee.DisplayName,
                     Email = issueFields.Assignee.EmailAddress
