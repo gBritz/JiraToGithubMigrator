@@ -9,6 +9,8 @@ namespace MigrateJiraIssuesToGithub.Models
         private readonly List<String> labels = new List<String>();
         private readonly List<String> issues = new List<String>();
 
+        public int TotalIssues { get; set; }
+
         public List<String> Sprints
         {
             get { return sprints; }
@@ -23,7 +25,5 @@ namespace MigrateJiraIssuesToGithub.Models
         {
             get { return issues; }
         }
-
-        public List<Issue> Issues { get; set; }
     }
 }

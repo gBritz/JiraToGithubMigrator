@@ -20,14 +20,24 @@ namespace MigrateJiraIssuesToGithub
         {
             Checker.IsNull(searchResult, "searchResult");
 
-            var result = new ProjectDetail();
+            var result = new ProjectDetail
+            {
+                TotalIssues = searchResult.Total
+            };
 
             foreach (var issueJira in searchResult.Issues)
             {
                 var issueFields = issueJira.Fields;
 
                 AddIssueTypeAsLabelIfNoContains(issueFields, result.Labels);
-                AddSprintIfNoContains(issueFields, result.Sprints);
+                try
+                {
+                    AddSprintIfNoContains(issueFields, result.Sprints);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
                 AddLabelIfNoContains(issueFields, result.Labels);
 
                 result.IssueKeys.Add(issueJira.Key);
