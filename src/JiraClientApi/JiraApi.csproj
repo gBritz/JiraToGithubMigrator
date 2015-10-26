@@ -51,10 +51,12 @@
   <ItemGroup>
     <Compile Include="AttachmentInfo.cs" />
     <Compile Include="AuthorInfo.cs" />
+    <Compile Include="ChangelogHistory.cs" />
     <Compile Include="Checker.cs" />
     <Compile Include="CommentInfo.cs" />
     <Compile Include="CommentsInfo.cs" />
     <Compile Include="FieldInfo.cs" />
+    <Compile Include="IssueChangelog.cs" />
     <Compile Include="IssueInfo.cs" />
     <Compile Include="IssueTypeInfo.cs" />
     <Compile Include="JiraClientApi.cs" />
@@ -65,6 +67,7 @@
     <Compile Include="ResolutionInfo.cs" />
     <Compile Include="SprintInfo.cs" />
     <Compile Include="SprintUtil.cs" />
+    <Compile Include="FieldChange.cs" />
     <Compile Include="StatusInfo.cs" />
     <Compile Include="WatchesInfo.cs" />
   </ItemGroup>

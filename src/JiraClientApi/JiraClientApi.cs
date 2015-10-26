@@ -24,6 +24,11 @@ namespace JiraApi
             this.password = password;
         }
 
+        /// <summary>
+        /// True to retrieve all issue history.
+        /// </summary>
+        public bool ViewChangelog { get; set; }
+
         public IssueInfo GetIssue(string key)
         {
             Checker.IsNull(key, "key");
@@ -36,8 +41,14 @@ namespace JiraApi
         {
             Checker.IsNull(key, "key");
 
-            return await baseUrl
-                .AppendPathSegments("issue", key)
+            var client = baseUrl.AppendPathSegments("issue", key);
+
+            if (ViewChangelog)
+            {
+                client = client.SetQueryParam("expand", "changelog");
+            }
+
+            return await client
                 .WithBasicAuth(username, password)
                 .GetJsonAsync<IssueInfo>();
         }

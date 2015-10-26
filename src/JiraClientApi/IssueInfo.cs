@@ -1,17 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
 
 namespace JiraApi
 {
     public class IssueInfo
     {
-        public int Id { get; set; }
+        public Int32 Id { get; set; }
 
-        public string Key { get; set; }
+        public String Key { get; set; }
 
-        public string Expand { get; set; }
+        public String Expand { get; set; }
 
-        public string Self { get; set; }
+        public String Self { get; set; }
 
         public FieldInfo Fields { get; set; }
+
+        public IssueChangelog Changelog { get; set; }
     }
 }
