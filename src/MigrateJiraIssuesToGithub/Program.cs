@@ -11,14 +11,19 @@ namespace MigrateJiraIssuesToGithub
     {
         public static void Main(string[] args)
         {
-            var path = @"C:\Users\Guilherme\Desktop\jira-to-github";
+            var projectPath = @"C:\Users\Guilherme\Desktop\jira-to-github";
+            var issuePath =  Path.Combine(projectPath, "issues");
 
             var jiraClientApi = new JiraClientApi("username", "password");
             var markdownConverter = new MarkdownFlavorConverter();
             var projectUtil = new ProjectHelper(markdownConverter);
 
-            var projectDetail = RetrieveProjectDescription("***", jiraClientApi, projectUtil);
-            File.WriteAllText(@"C:\Users\Guilherme\Desktop\jira-to-github\project.json", projectDetail.ToJson());
+            // var projectDetail = RetrieveProjectDescription("***", jiraClientApi, projectUtil);
+            // File.WriteAllText(projectPath, projectDetail.ToJson());
+
+            var projectFileFullPath = Path.Combine(projectPath, "project.json");
+            var projectDetail = File.ReadAllText(projectFileFullPath).ToObject<ProjectDetail>();
+            SaveIssuesInformation(projectDetail.IssueKeys, jiraClientApi, projectUtil, issuePath);
 
             Log("INFO: success!");
             Log("Press any key to exit.");
@@ -65,9 +70,11 @@ namespace MigrateJiraIssuesToGithub
             return result;
         }
 
-        public static List<Issue> RetrieveIssues(List<String> issueKeys, JiraClientApi clientApi, ProjectHelper projectUtil)
+        public static void SaveIssuesInformation(List<String> issueKeys, JiraClientApi clientApi, ProjectHelper projectUtil, String path)
         {
-            var issues = new List<Issue>();
+            Log("INFO: start save information issues");
+            var savedIssue = 0;
+            var index = 0;
 
             foreach (var issueKey in issueKeys)
             {
@@ -77,10 +84,16 @@ namespace MigrateJiraIssuesToGithub
                 issue.Comments = projectUtil.ConvertToComments(issueJira.Fields);
                 issue.Files = projectUtil.ConvertToDataFile(issueJira.Fields, clientApi);
 
-                issues.Add(issue);
+                var filePath = Path.Combine(path, issue.JiraKey + ".txt");
+                File.WriteAllText(filePath, issue.ToJson());
+                savedIssue++;
+
+                Log(String.Format("INFO: {2} - saved {0}, spend {1} issues", issue.JiraKey, issueKeys.Count - savedIssue, index));
+
+                index++;
             }
 
-            return issues;
+            Log("INFO: completed");
         }
 
         public static void Log(String msg)

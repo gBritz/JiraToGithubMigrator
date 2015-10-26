@@ -18,5 +18,10 @@ namespace MigrateJiraIssuesToGithub
 
             return instance == null ? String.Empty : JsonConvert.SerializeObject(instance, settings);
         }
+
+        public static T ToObject<T>(this String json)
+        {
+            return String.IsNullOrEmpty(json) ? default(T) : JsonConvert.DeserializeObject<T>(json);
+        }
     }
 }
