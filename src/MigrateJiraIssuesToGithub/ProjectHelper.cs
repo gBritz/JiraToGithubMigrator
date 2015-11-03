@@ -59,11 +59,7 @@ namespace MigrateJiraIssuesToGithub
                 JiraKey = issueJira.Key,
                 Title = issueFields.Summary,
                 Content = issueFields.Description,
-                Creator = new Author
-                {
-                    Name = issueFields.Reporter.DisplayName,
-                    Email = issueFields.Reporter.EmailAddress
-                },
+                Creator = ConvertToAuthor(issueFields.Reporter),
                 CreateAt = issueFields.Created,
                 Labels = issueFields.Labels ?? new List<String>()
             };
@@ -74,12 +70,8 @@ namespace MigrateJiraIssuesToGithub
 
                 Debug.Assert(history == null, "history closed not found.");
 
+                issue.Closer = ConvertToAuthor(history.Author);
                 issue.ClosedAt = history.Created;
-                issue.Closer = new Author
-                {
-                    Name = history.Author.Name,
-                    Email = history.Author.EmailAddress
-                };
             }
 
             if (HasSprintDescription(issueFields))
@@ -94,11 +86,7 @@ namespace MigrateJiraIssuesToGithub
 
                 Debug.Assert(history == null, "history assignee not found.");
 
-                issue.Assigned = new Author
-                {
-                    Name = history.Author.DisplayName,
-                    Email = history.Author.EmailAddress
-                };
+                issue.Assigned = ConvertToAuthor(history.Author);
                 issue.AssignedAt = history.Created;
             }
 
@@ -156,6 +144,17 @@ namespace MigrateJiraIssuesToGithub
             }
 
             return result;
+        }
+
+        public Author ConvertToAuthor(AuthorInfo author)
+        {
+            Checker.IsNull(author, "author");
+
+            return new Author
+            {
+                Name = author.DisplayName,
+                Email = author.EmailAddress
+            };
         }
 
         private void AddSprintIfNoContains(FieldInfo issueFields, List<string> sprints)
