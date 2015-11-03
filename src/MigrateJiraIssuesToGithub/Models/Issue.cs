@@ -11,6 +11,8 @@ namespace MigrateJiraIssuesToGithub.Models
 
         public String Content { get; set; }
 
+        public Author Assigner { get; set; }
+
         public Author Assigned { get; set; }
 
         public DateTime? AssignedAt { get; set; }

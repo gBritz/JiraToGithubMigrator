@@ -86,7 +86,8 @@ namespace MigrateJiraIssuesToGithub
 
                 Debug.Assert(history == null, "history assignee not found.");
 
-                issue.Assigned = ConvertToAuthor(history.Author);
+                issue.Assigned = ConvertToAuthor(issueFields.Assignee);
+                issue.Assigner = new Author { Name = history.Items.First(i => i.Field == "assignee").FromString };
                 issue.AssignedAt = history.Created;
             }
 
