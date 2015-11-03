@@ -66,7 +66,7 @@ namespace MigrateJiraIssuesToGithub
 
             if (issueFields.Status.IsClosed)
             {
-                var history = issueJira.Changelog.Histories.LastOrDefault(h => h.Items.Any(i => i.Field == "status" && i.FromString == issueFields.Status.Name));
+                var history = issueJira.Changelog.Histories.LastOrDefault(h => h.Items.Any(i => i.Field == "status" && i.ToString == issueFields.Status.Name));
 
                 Debug.Assert(history == null, "history closed not found.");
 
