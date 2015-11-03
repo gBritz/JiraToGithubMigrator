@@ -2,6 +2,8 @@
 using MigrateJiraIssuesToGithub.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace MigrateJiraIssuesToGithub
 {
@@ -57,13 +59,26 @@ namespace MigrateJiraIssuesToGithub
                 JiraKey = issueJira.Key,
                 Title = issueFields.Summary,
                 Content = issueFields.Description,
-                ClosedAt = issueFields.Status.IsClosed ? (DateTime?)issueFields.Updated : null,
                 Creator = new Author
                 {
                     Name = issueFields.Reporter.DisplayName,
                     Email = issueFields.Reporter.EmailAddress
                 }
             };
+
+            if (issueFields.Status.IsClosed)
+            {
+                var history = issueJira.Changelog.Histories.LastOrDefault(h => h.Items.Any(i => i.Field == "status" && i.FromString == issueFields.Status.Name));
+
+                Debug.Assert(history == null, "history closed not found.");
+
+                issue.ClosedAt = history.Created;
+                issue.Closer = new Author
+                {
+                    Name = history.Author.Name,
+                    Email = history.Author.EmailAddress
+                };
+            }
 
             if (HasSprintDescription(issueFields))
             {
