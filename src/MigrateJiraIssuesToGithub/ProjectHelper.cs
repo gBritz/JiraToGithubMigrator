@@ -89,11 +89,16 @@ namespace MigrateJiraIssuesToGithub
 
             if (issueFields.Assignee != null)
             {
+                var history = issueJira.Changelog.Histories.LastOrDefault(h => h.Items.Any(i => i.Field == "assignee"));
+
+                Debug.Assert(history == null, "history assignee not found.");
+
                 issue.Assigned = new Author
                 {
-                    Name = issueFields.Assignee.DisplayName,
-                    Email = issueFields.Assignee.EmailAddress
+                    Name = history.Author.DisplayName,
+                    Email = history.Author.EmailAddress
                 };
+                issue.AssignedAt = history.Created;
             }
 
             issue.Comments = ConvertToComments(issueFields);
