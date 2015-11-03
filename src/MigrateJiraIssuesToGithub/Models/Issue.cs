@@ -24,5 +24,7 @@ namespace MigrateJiraIssuesToGithub.Models
         public List<Comment> Comments { get; set; }
 
         public List<AttachmentFile> Files { get; set; }
+
+        public List<String> Labels { get; set; }
     }
 }
