@@ -82,13 +82,20 @@ namespace MigrateJiraIssuesToGithub
 
             if (issueFields.Assignee != null)
             {
-                var history = issueJira.Changelog.Histories.LastOrDefault(h => h.Items.Any(i => i.Field == "assignee"));
-
-                Debug.Assert(history == null, "history assignee not found.");
-
                 issue.Assigned = ConvertToAuthor(issueFields.Assignee);
-                issue.Assigner = new Author { Name = history.Items.First(i => i.Field == "assignee").FromString };
-                issue.AssignedAt = history.Created;
+
+                var history = issueJira.Changelog.Histories.LastOrDefault(h => h.Items.Any(i => i.Field == "assignee"));
+                if (history != null)
+                {
+                    issue.Assigner = new Author { Name = history.Items.First(i => i.Field == "assignee").FromString };
+                    issue.AssignedAt = history.Created;
+                }
+                else
+                {
+                    //obs.: creator issue.
+                    issue.Assigner = ConvertToAuthor(issueFields.Reporter);
+                    issue.AssignedAt = issueFields.Created;
+                }
             }
 
             var inProgressStatus = issueJira.Changelog.Histories.LastOrDefault(h => h.Items.Any(i => i.Field == "status" && i.FromString == "In Progress"));
