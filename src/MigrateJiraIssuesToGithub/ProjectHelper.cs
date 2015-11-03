@@ -90,6 +90,14 @@ namespace MigrateJiraIssuesToGithub
                 issue.AssignedAt = history.Created;
             }
 
+            var inProgressStatus = issueJira.Changelog.Histories.LastOrDefault(h => h.Items.Any(i => i.Field == "status" && i.FromString == "In Progress"));
+
+            if (inProgressStatus != null)
+            {
+                issue.InProgress = ConvertToAuthor(inProgressStatus.Author);
+                issue.InProgressAt = inProgressStatus.Created;
+            }
+
             issue.Comments = ConvertToComments(issueFields);
 
             return issue;
