@@ -64,6 +64,7 @@ namespace MigrateJiraIssuesToGithub
                     Name = issueFields.Reporter.DisplayName,
                     Email = issueFields.Reporter.EmailAddress
                 },
+                CreateAt = issueFields.Created,
                 Labels = issueFields.Labels ?? new List<String>()
             };
 
