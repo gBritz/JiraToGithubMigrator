@@ -78,18 +78,13 @@ namespace MigrateJiraIssuesToGithub
 
                 NewIssue newIssue = null;
 
-                try
+                Log("WARNING: Waiting for 1 minute.");
+                Thread.Sleep(1000 * 60);
+
+                while (!migrator.TryMigrateToIssue(jiraIssue, milestones, labels, ref newIssue))
                 {
-                    migrator.MigrateToIssue(jiraIssue, milestones, labels, ref newIssue);
-                }
-                catch (Exception ex)
-                {
-                    Log(String.Format("WARNING: issue key {0} is blocked by github.", issueKey));
                     Log("WARNING: Waiting for 1 minute.");
                     Thread.Sleep(1000 * 60);
-
-                    Log("INFO: Resend informations for issue key " + issueKey);
-                    migrator.MigrateToIssue(jiraIssue, milestones, labels, ref newIssue);
                 }
             }
             Log("Info: Issues are created with success.");

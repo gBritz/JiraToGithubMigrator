@@ -175,6 +175,24 @@ namespace MigrateJiraIssuesToGithub
             Log(String.Format("Info: Issue {0} created", jiraIssue.JiraKey));
         }
 
+        public Boolean TryMigrateToIssue(MigrateJiraIssuesToGithub.Models.Issue jiraIssue, List<MilestoneGitHub> milestones, List<LabelGitHub> labels, ref NewIssue newIssue)
+        {
+            var result = false;
+
+            try
+            {
+                MigrateToIssue(jiraIssue, milestones, labels, ref newIssue);
+
+                result = true;
+            }
+            catch (Exception ex)
+            {
+                Log(String.Format("WARNING: issue key {0} is blocked by github.", jiraIssue.JiraKey));
+            }
+
+            return result;
+        }
+
         private void Log(String message)
         {
             if (Logger != null)
