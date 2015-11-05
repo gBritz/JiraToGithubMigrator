@@ -59,12 +59,14 @@ namespace MigrateJiraIssuesToGithub
 
             if (!File.Exists(milestonesPath))
             {
-                migrator.MigrateToMilestones(projectDetail.Sprints);
+                var mls = migrator.MigrateToMilestones(projectDetail.Sprints);
+                File.WriteAllText(milestonesPath, mls.ToJson());
             }
 
             if (!File.Exists(labelsPath))
             {
-                migrator.MigrateToLabels(projectDetail.Labels);
+                var lbs migrator.MigrateToLabels(projectDetail.Labels);
+                File.WriteAllText(labelsPath, lbs.ToJson());
             }
 
             milestones = File.ReadAllText(milestonesPath).ToObject<List<MilestoneGitHub>>();
