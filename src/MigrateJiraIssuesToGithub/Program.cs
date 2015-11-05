@@ -65,7 +65,7 @@ namespace MigrateJiraIssuesToGithub
 
             if (!File.Exists(labelsPath))
             {
-                var lbs migrator.MigrateToLabels(projectDetail.Labels);
+                var lbs = migrator.MigrateToLabels(projectDetail.Labels);
                 File.WriteAllText(labelsPath, lbs.ToJson());
             }
 
