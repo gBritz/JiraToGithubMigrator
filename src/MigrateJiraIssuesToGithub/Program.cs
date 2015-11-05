@@ -170,7 +170,7 @@ namespace MigrateJiraIssuesToGithub
 
         public static void SleepForMigrateIssue()
         {
-            Log("INFO: Waiting for 1 minute.");
+            Log("INFO: Waiting for 30 seconds.");
             Thread.Sleep(1000 * 30); //60
         }
 
