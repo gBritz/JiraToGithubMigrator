@@ -1,9 +1,12 @@
 ﻿using JiraApi;
+using MigrateJiraIssuesToGithub.GitHubModels;
 using MigrateJiraIssuesToGithub.Models;
+using Octokit;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace MigrateJiraIssuesToGithub
 {
@@ -11,19 +14,85 @@ namespace MigrateJiraIssuesToGithub
     {
         public static void Main(string[] args)
         {
+            var githubOrganizationName = "???";
+            var githubRepositoryName = "???";
+
             var projectPath = @"C:\Users\Guilherme\Desktop\jira-to-github";
             var issuePath =  Path.Combine(projectPath, "issues");
+            var projectFileFullPath = Path.Combine(projectPath, "project.json");
+            var milestonesPath = Path.Combine(projectPath, "milestones.json");
+            var labelsPath = Path.Combine(projectPath, "labels.json");
 
-            var jiraClientApi = new JiraClientApi("username", "password");
+            var jiraClientApi = new JiraClientApi("username", "password") { ViewChangelog = true };
             var markdownConverter = new MarkdownFlavorConverter();
             var projectUtil = new ProjectHelper(markdownConverter);
+            ProjectDetail projectDetail = null;
 
-            // var projectDetail = RetrieveProjectDescription("***", jiraClientApi, projectUtil);
-            // File.WriteAllText(projectPath, projectDetail.ToJson());
+            /*var jiraIssue = jiraClientApi.GetIssue("***");
+            var issue = projectUtil.ConvertToIssue(jiraIssue);
+            Console.WriteLine(issue.JiraKey);*/
 
-            var projectFileFullPath = Path.Combine(projectPath, "project.json");
-            var projectDetail = File.ReadAllText(projectFileFullPath).ToObject<ProjectDetail>();
-            SaveIssuesInformation(projectDetail.IssueKeys, jiraClientApi, projectUtil, issuePath);
+            /*Log("INFO: Getting all project information...");
+            projectDetail = RetrieveProjectDescription("***", jiraClientApi, projectUtil);
+            Log("INFO: Saving project information!");
+            File.WriteAllText(projectFileFullPath, projectDetail.ToJson());
+            Log("INFO: Project information saved with success!");*/
+
+            /*Log("INFO: Getting all issues information...");
+            projectDetail = File.ReadAllText(projectFileFullPath).ToObject<ProjectDetail>();
+            SaveIssuesInformation(projectDetail.IssueKeys, jiraClientApi, projectUtil, issuePath);*/
+
+            projectDetail = File.ReadAllText(projectFileFullPath).ToObject<ProjectDetail>();
+
+            var client = new GitHubClient(new ProductHeaderValue("jira-migrator"))
+            {
+                Credentials = new Credentials("username", "password")
+            };
+
+            var migrator = new Migrator(projectUtil, client, githubOrganizationName, githubRepositoryName)
+            {
+                Logger = Log
+            };
+
+            List<MilestoneGitHub> milestones = null;
+            List<LabelGitHub> labels = null;
+
+            if (!File.Exists(milestonesPath))
+            {
+                migrator.MigrateToMilestones(projectDetail.Sprints);
+            }
+
+            if (!File.Exists(labelsPath))
+            {
+                migrator.MigrateToLabels(projectDetail.Labels);
+            }
+
+            milestones = File.ReadAllText(milestonesPath).ToObject<List<MilestoneGitHub>>();
+            labels = File.ReadAllText(labelsPath).ToObject<List<LabelGitHub>>();
+
+            Log("Info: Creating all issues.");
+            foreach (var issueKey in projectDetail.IssueKeys)
+            {
+                var fileName = Path.Combine(issuePath, issueKey + ".txt");
+                var jiraIssue = File.ReadAllText(fileName).ToObject<MigrateJiraIssuesToGithub.Models.Issue>();
+
+                NewIssue newIssue = null;
+
+                try
+                {
+                    migrator.MigrateToIssue(jiraIssue, milestones, labels, ref newIssue);
+                }
+                catch (Exception ex)
+                {
+                    Log(String.Format("WARNING: issue key {0} is blocked by github.", issueKey));
+                    Log("WARNING: Waiting for 1 minute.");
+                    Thread.Sleep(1000 * 60);
+
+                    Log("INFO: Resend informations for issue key " + issueKey);
+                    migrator.MigrateToIssue(jiraIssue, milestones, labels, ref newIssue);
+                }
+            }
+            Log("Info: Issues are created with success.");
 
             Log("INFO: success!");
             Log("Press any key to exit.");
@@ -75,6 +144,11 @@ namespace MigrateJiraIssuesToGithub
             Log("INFO: start save information issues");
             var savedIssue = 0;
             var index = 0;
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
 
             foreach (var issueKey in issueKeys)
             {

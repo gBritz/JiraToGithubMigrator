@@ -48,7 +48,10 @@
     <Compile Include="Checker.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="GitHubModels\LabelGitHub.cs" />
+    <Compile Include="GitHubModels\MilestoneGitHub.cs" />
     <Compile Include="MarkdownFlavorConverter.cs" />
+    <Compile Include="Migrator.cs" />
     <Compile Include="Models\AttachmentFile.cs" />
     <Compile Include="Models\Author.cs" />
     <Compile Include="Models\Comment.cs" />
