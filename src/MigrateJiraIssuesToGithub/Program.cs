@@ -78,16 +78,17 @@ namespace MigrateJiraIssuesToGithub
                 var fileName = Path.Combine(issuePath, issueKey + ".txt");
                 var jiraIssue = File.ReadAllText(fileName).ToObject<MigrateJiraIssuesToGithub.Models.Issue>();
 
-                NewIssue newIssue = null;
+                Octokit.Issue newIssue = null;
 
-                Log("WARNING: Waiting for 1 minute.");
-                Thread.Sleep(1000 * 60);
+                SleepForMigrateIssue();
 
                 while (!migrator.TryMigrateToIssue(jiraIssue, milestones, labels, ref newIssue))
                 {
-                    Log("WARNING: Waiting for 1 minute.");
-                    Thread.Sleep(1000 * 60);
+                    Log(String.Format("WARNING: issue key {0} is blocked by github.", jiraIssue.JiraKey));
+                    SleepForMigrateIssue();
                 }
+
+                Log(String.Format("INFO: jira issue#{0} is created to github issue#{1}", jiraIssue.JiraKey, newIssue.Number));
             }
             Log("Info: Issues are created with success.");
 
@@ -165,6 +166,12 @@ namespace MigrateJiraIssuesToGithub
             }
 
             Log("INFO: completed");
+        }
+
+        public static void SleepForMigrateIssue()
+        {
+            Log("INFO: Waiting for 1 minute.");
+            Thread.Sleep(1000 * 30); //60
         }
 
         public static void Log(String msg)

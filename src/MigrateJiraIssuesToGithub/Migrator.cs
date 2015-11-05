@@ -80,18 +80,16 @@ namespace MigrateJiraIssuesToGithub
             return labels;
         }
 
-        public void MigrateToIssue(MigrateJiraIssuesToGithub.Models.Issue jiraIssue, List<MilestoneGitHub> milestones, List<LabelGitHub> labels, ref NewIssue newIssue)
+        public void MigrateToIssue(MigrateJiraIssuesToGithub.Models.Issue jiraIssue, List<MilestoneGitHub> milestones, List<LabelGitHub> labels, ref Issue githubIssue)
         {
             if (String.IsNullOrEmpty(jiraIssue.SprintName))
             {
                 jiraIssue.SprintName = "1.0 Inicial";
             }
 
-            Octokit.Issue issueResult = null;
-
-            if (newIssue == null)
+            if (githubIssue == null)
             {
-                newIssue = new NewIssue(jiraIssue.Title)
+                var newIssue = new NewIssue(jiraIssue.Title)
                 {
                     Body = jiraIssue.Content,
                     Milestone = milestones.First(m => m.Title == jiraIssue.SprintName).Number
@@ -104,7 +102,7 @@ namespace MigrateJiraIssuesToGithub
 
                 var nIssue = newIssue;
                 var taskResult = Task.Run<Octokit.Issue>(async () => await client.Issue.Create(githubOrganizationName, githubRepositoryName, nIssue));
-                issueResult = taskResult.Result;
+                githubIssue = taskResult.Result;
             }
 
             //todo: archive...
@@ -150,7 +148,7 @@ namespace MigrateJiraIssuesToGithub
     {0} ({1}) set `Closed` at {2:dd/MM/yyyy hh:mm:ss}", jiraIssue.Closer.Name, jiraIssue.Closer.Email, jiraIssue.ClosedAt);
             }
 
-            client.Issue.Comment.Create(githubOrganizationName, githubRepositoryName, issueResult.Number, sbStatusComment.ToString());
+            client.Issue.Comment.Create(githubOrganizationName, githubRepositoryName, githubIssue.Number, sbStatusComment.ToString());
 
             // obs.: adicionar comentários
             foreach (var comment in jiraIssue.Comments)
@@ -158,7 +156,7 @@ namespace MigrateJiraIssuesToGithub
                 var commentAuthor = String.Format(@"
     **Commentary** by {0} ({1})
 ", comment.Creator.Name, comment.Creator.Email);
-                client.Issue.Comment.Create(githubOrganizationName, githubRepositoryName, issueResult.Number, commentAuthor + comment.Body);
+                client.Issue.Comment.Create(githubOrganizationName, githubRepositoryName, githubIssue.Number, commentAuthor + comment.Body);
             }
 
             // obs.: fechar issue
@@ -169,25 +167,25 @@ namespace MigrateJiraIssuesToGithub
                     State = ItemState.Closed
                 };
 
-                client.Issue.Update(githubOrganizationName, githubRepositoryName, issueResult.Number, issueUpdate);
+                client.Issue.Update(githubOrganizationName, githubRepositoryName, githubIssue.Number, issueUpdate);
             }
 
             Log(String.Format("Info: Issue {0} created", jiraIssue.JiraKey));
         }
 
-        public Boolean TryMigrateToIssue(MigrateJiraIssuesToGithub.Models.Issue jiraIssue, List<MilestoneGitHub> milestones, List<LabelGitHub> labels, ref NewIssue newIssue)
+        public Boolean TryMigrateToIssue(MigrateJiraIssuesToGithub.Models.Issue jiraIssue, List<MilestoneGitHub> milestones, List<LabelGitHub> labels, ref Issue githubIssue)
         {
             var result = false;
 
             try
             {
-                MigrateToIssue(jiraIssue, milestones, labels, ref newIssue);
+                MigrateToIssue(jiraIssue, milestones, labels, ref githubIssue);
 
                 result = true;
             }
             catch (Exception ex)
             {
-                Log(String.Format("WARNING: issue key {0} is blocked by github.", jiraIssue.JiraKey));
+                Log(String.Format("ERROR: issue key {0} has error {1}.", jiraIssue.JiraKey, ex.Message));
             }
 
             return result;
