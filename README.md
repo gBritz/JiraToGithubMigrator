@@ -1,4 +1,4 @@
-# MigrateJiraIssuesToGithub (v0.0.1-alpha)
+# MigrateJiraIssuesToGithub
 
 Console application that migrate jira issues to github.
 
